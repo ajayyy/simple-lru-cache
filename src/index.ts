@@ -6,23 +6,23 @@ export type LRUCacheOptions = ({
     ttl: number;
 };
 
-interface CacheItemData<V> {
+interface CacheItemData<K, V> {
     value: V;
-    next: string | null;
-    prev: string | null;
+    next: K | null;
+    prev: K | null;
 }
 
-interface CacheItem<V> extends CacheItemData<V> {
+interface CacheItem<K, V> extends CacheItemData<K, V> {
     size: number;
     created: number;
 }
 
-export class LRUCache<V> {
+export class LRUCache<K, V> {
     options: LRUCacheOptions;
 
-    data: Map<string, CacheItem<V>>;
-    tail: string | null;
-    first: string | null;
+    data: Map<K, CacheItem<K, V>>;
+    tail: K | null;
+    first: K | null;
     currentSize: number;
     currentElementCount: number;
 
@@ -36,7 +36,7 @@ export class LRUCache<V> {
         this.first = null;
     }
 
-    set(key: string, value: V) {
+    set(key: K, value: V) {
         if (("maxSize" in this.options && this.currentSize >= this.options.maxSize)
             || ("maxElements" in this.options && this.currentElementCount >= this.options.maxElements)) {
             if (this.first) {
@@ -58,7 +58,7 @@ export class LRUCache<V> {
             this.currentElementCount++;
         }
         
-        const data: CacheItemData<V> = {
+        const data: CacheItemData<K, V> = {
             value,
             next: null,
             prev: prevTail
@@ -82,7 +82,7 @@ export class LRUCache<V> {
         }
     }
 
-    get(key: string): V | null {
+    get(key: K): V | null {
         const existingData = this.data.get(key);
         if (existingData) {
             if (performance.now() - existingData.created < this.options.ttl) {
@@ -97,7 +97,7 @@ export class LRUCache<V> {
         return null;
     }
 
-    delete(key: string) {
+    delete(key: K) {
         const existingData = this.data.get(key);
         if (existingData) {
             this.currentSize -= existingData.size;
@@ -134,7 +134,7 @@ export class LRUCache<V> {
         }
     }
 
-    moveToTop(key: string, existingData: CacheItem<V>) {
+    moveToTop(key: K, existingData: CacheItem<K, V>) {
         if (key === this.tail) {
             // No need to do anything
             return;
@@ -172,11 +172,23 @@ export class LRUCache<V> {
         existingData.prev = existingTail;
     }
 
-    #calcSize(item: CacheItemData<V>) {
+    clear() {
+        this.data.clear();
+        this.currentSize = 0;
+        this.currentElementCount = 0;
+        this.tail = null;
+        this.first = null;
+    }
+
+    #calcSize(item: CacheItemData<K, V>) {
         if (typeof item.value === "string") {
-            return (item.next?.length ?? 0) + (item.prev?.length ?? 0) + item.value.length;
+            return this.#keyLength(item.next) + this.#keyLength(item.prev) + item.value.length;
         } else {
             return 1;
         }
+    }
+
+    #keyLength(key: K | null): number {
+        return key && typeof key === "string" ? key.length : 0;
     }
 }
