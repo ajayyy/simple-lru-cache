@@ -1,5 +1,5 @@
 {
-  "name": "simple-lru-cache",
+  "name": "@ajayyy/simple-lru-cache",
   "version": "1.0.0",
   "description": "Simple LRU in-memory cache",
   "license": "MIT",
