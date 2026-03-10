@@ -97,7 +97,7 @@ export class LRUCache<K, V> {
         return null;
     }
 
-    delete(key: K) {
+    delete(key: K): boolean {
         const existingData = this.data.get(key);
         if (existingData) {
             this.currentSize -= existingData.size;
@@ -131,7 +131,11 @@ export class LRUCache<K, V> {
                     nextItem.prev = existingData.prev
                 }
             }
+
+            return true;
         }
+
+        return false;
     }
 
     moveToTop(key: K, existingData: CacheItem<K, V>) {
