@@ -37,10 +37,12 @@ export class LRUCache<K, V> {
     }
 
     set(key: K, value: V) {
-        if (("maxSize" in this.options && this.currentSize >= this.options.maxSize)
+        while (("maxSize" in this.options && this.currentSize >= this.options.maxSize)
             || ("maxElements" in this.options && this.currentElementCount >= this.options.maxElements)) {
             if (this.first) {
                 this.delete(this.first);
+            } else {
+                break;
             }
         }
 
@@ -73,12 +75,12 @@ export class LRUCache<K, V> {
 
         this.data.set(key, {
             created: performance.now(),
-            size: "maxSize" in this.options ? this.#calcSize(data) : 0,
+            size: "maxSize" in this.options ? this.#calcSize(key, value) : 0,
             ...data
         });
 
         if ("maxSize" in this.options) {
-            this.currentSize += this.#calcSize(data);
+            this.currentSize += this.#calcSize(key, value);
         }
     }
 
@@ -184,9 +186,9 @@ export class LRUCache<K, V> {
         this.first = null;
     }
 
-    #calcSize(item: CacheItemData<K, V>) {
-        if (typeof item.value === "string") {
-            return this.#keyLength(item.next) + this.#keyLength(item.prev) + item.value.length;
+    #calcSize(key: K, value: V) {
+        if (typeof value === "string") {
+            return this.#keyLength(key) * 2 + value.length;
         } else {
             return 1;
         }

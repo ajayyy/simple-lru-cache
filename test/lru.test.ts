@@ -39,7 +39,7 @@ test("Add and remove items from lru cache with max elements", () => {
 
 test("Add and remove items from lru cache with max size", () => {
     const lru = new LRUCache({
-        maxSize: 31,
+        maxSize: 60,
         ttl: 100000
     });
 
@@ -68,10 +68,37 @@ test("Add and remove items from lru cache with max size", () => {
     assert.strictEqual(lru.get("test5"), "1234567895");
 });
 
+test("Add and remove items from lru cache with max size multiple at once", () => {
+    const lru = new LRUCache({
+        maxSize: 60,
+        ttl: 100000
+    });
+
+    // 20 + 20 + 10 + 30
+    lru.set("test1", "1234567891");
+    lru.set("test2", "1234567892");
+    lru.set("tes3", "11");
+    lru.set("tes4", "2212345678941234567894");
+
+    assert.strictEqual(lru.get("tes3"), "11");
+    assert.strictEqual(lru.get("tes4"), "2212345678941234567894");
+    assert.strictEqual(lru.get("test1"), "1234567891");
+    assert.strictEqual(lru.get("test2"), "1234567892");
+
+    lru.set("test4", "1234567894");
+
+    // Should remove both elements to meet space
+    assert.strictEqual(lru.get("tes3"), null);
+    assert.strictEqual(lru.get("tes4"), null);
+    assert.strictEqual(lru.get("test1"), "1234567891");
+    assert.strictEqual(lru.get("test2"), "1234567892");
+    assert.strictEqual(lru.get("test4"), "1234567894");
+});
+
 test("Items removed by ttl from lru cache with max size", async () => {
     const lru = new LRUCache({
-        maxSize: 31,
-        ttl: 20
+        maxSize: 60,
+        ttl: 6
     });
 
     lru.set("test1", "1234567891");
@@ -89,7 +116,7 @@ test("Items removed by ttl from lru cache with max size", async () => {
     assert.strictEqual(lru.get("test3"), "1234567893");
     assert.strictEqual(lru.get("test4"), "1234567894");
 
-    await sleep(20);
+    await sleep(7);
 
     assert.strictEqual(lru.get("test1"), null);
     assert.strictEqual(lru.get("test2"), null);
