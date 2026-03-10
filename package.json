@@ -1,0 +1,21 @@
+{
+  "name": "simple-lru-cache",
+  "version": "1.0.0",
+  "description": "Simple LRU in-memory cache",
+  "license": "MIT",
+  "author": "Ajay Ramachandran",
+  "type": "module",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ajayyy/simple-lru-cache.git"
+  },
+  "scripts": {
+    "test": "node --test",
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "@types/node": "^25.4.0",
+    "typescript": "^5.9.3"
+  }
+}
