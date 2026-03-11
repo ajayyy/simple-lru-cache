@@ -176,6 +176,7 @@ export class LRUCache<K, V> {
 
         this.tail = key;
         existingData.prev = existingTail;
+        existingData.next = null;
     }
 
     clear() {
