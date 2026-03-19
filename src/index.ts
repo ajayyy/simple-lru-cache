@@ -37,13 +37,13 @@ export class LRUCache<K, V> {
     }
 
     set(key: K, value: V) {
-        while (("maxSize" in this.options && this.currentSize >= this.options.maxSize)
-            || ("maxElements" in this.options && this.currentElementCount >= this.options.maxElements)) {
-            if (this.first) {
-                this.delete(this.first);
-            } else {
-                break;
-            }
+        if ("maxElements" in this.options && this.currentElementCount >= this.options.maxElements
+                && this.first) {
+            this.delete(this.first);
+        }
+
+        if ("maxSize" in this.options && this.currentSize >= this.options.maxSize) {
+            this.deleteUpToSize(this.currentSize - this.options.maxSize);
         }
 
         const existingData = this.data.get(key);
@@ -134,6 +134,55 @@ export class LRUCache<K, V> {
                 }
             }
 
+            return true;
+        }
+
+        return false;
+    }
+
+    deleteUpToSize(sizeToDelete: number): boolean {
+        let sizeDeleted = 0;
+        let key = this.first;
+        if (!key) {
+            // Nothing to delete
+            return false;
+        }
+
+        let existingData: CacheItem<K, V> | null = this.data.get(key) ?? null;
+        if (existingData) {
+            do {
+                this.currentSize -= existingData.size;
+                sizeDeleted += existingData.size;
+                this.currentElementCount--;
+                this.data.delete(key);
+
+                if (sizeDeleted < sizeToDelete) {
+                    if (existingData.next) {
+                        key = existingData.next;
+                        existingData = this.data.get(key) ?? null;
+                    } else {
+                        existingData = null;
+                    }
+                }
+            } while (existingData && sizeDeleted < sizeToDelete)
+            
+            if (existingData) {
+                this.first = existingData.next;
+                if (this.first) {
+                    const firstData = this.data.get(this.first);
+                    if (firstData) {
+                        firstData.prev = null;
+                    }
+                }
+
+                if (this.tail === key) {
+                    this.tail = null;
+                }
+            } else {
+                this.first = null;
+                this.tail = null;
+            }
+            
             return true;
         }
 
