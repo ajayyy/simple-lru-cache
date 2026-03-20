@@ -150,7 +150,7 @@ export class LRUCache<K, V> {
 
         let existingData: CacheItem<K, V> | null = this.data.get(key) ?? null;
         if (existingData) {
-            do {
+            // do {
                 this.currentSize -= existingData.size;
                 sizeDeleted += existingData.size;
                 this.currentElementCount--;
@@ -164,7 +164,7 @@ export class LRUCache<K, V> {
                         existingData = null;
                     }
                 }
-            } while (existingData && sizeDeleted < sizeToDelete)
+            // } while (existingData && sizeDeleted < sizeToDelete)
             
             if (existingData) {
                 this.first = existingData.next;
